@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import styles from "./MovieModal.module.css";
 import type { Movie } from "../../types/movie";
 
@@ -6,6 +7,8 @@ interface MovieModalProps {
   movie: Movie;
   onClose: () => void;
 }
+
+const modalRoot = document.getElementById("modal-root");
 
 export default function MovieModal({ movie, onClose }: MovieModalProps) {
   useEffect(() => {
@@ -28,20 +31,16 @@ export default function MovieModal({ movie, onClose }: MovieModalProps) {
     if (e.target === e.currentTarget) onClose();
   };
 
-  const imgPath = movie.backdrop_path || movie.poster_path;
-  const imgUrl = imgPath ? `https://image.tmdb.org/t/p/original/${imgPath}` : "";
+  const posterUrl = movie.poster_path
+    ? `https://image.tmdb.org/t/p/w500/${movie.poster_path}`
+    : "";
 
   const year = movie.release_date ? movie.release_date.slice(0, 4) : "—";
   const rating =
     typeof movie.vote_average === "number" ? movie.vote_average.toFixed(1) : "—";
 
-  return (
-    <div
-      className={styles.backdrop}
-      onClick={handleBackdropClick}
-      role="dialog"
-      aria-modal="true"
-    >
+  const modal = (
+    <div className={styles.backdrop} onClick={handleBackdropClick} role="dialog" aria-modal="true">
       <div className={styles.modal}>
         <button
           type="button"
@@ -52,8 +51,8 @@ export default function MovieModal({ movie, onClose }: MovieModalProps) {
           ×
         </button>
 
-        {imgUrl ? (
-          <img className={styles.image} src={imgUrl} alt={movie.title} />
+        {posterUrl ? (
+          <img className={styles.image} src={posterUrl} alt={movie.title} />
         ) : (
           <div className={styles.image} />
         )}
@@ -68,4 +67,8 @@ export default function MovieModal({ movie, onClose }: MovieModalProps) {
       </div>
     </div>
   );
+
+  if (!modalRoot) return null;
+
+  return createPortal(modal, modalRoot);
 }

@@ -1,12 +1,10 @@
 import { useState } from "react";
-import { Toaster } from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 
 import styles from "./App.module.css";
 import SearchBar from "../SearchBar/SearchBar";
 import MovieGrid from "../MovieGrid/MovieGrid";
 import MovieModal from "../MovieModal/MovieModal";
-import Loader from "../Loader/Loader";
-import ErrorMessage from "../ErrorMessage/ErrorMessage";
 
 import { fetchMovies } from "../../services/movieService";
 import type { Movie } from "../../types/movie";
@@ -17,7 +15,7 @@ export default function App() {
   const [isError, setIsError] = useState(false);
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
 
-  const handleSearch = async (query: string) => {
+  async function handleSearch(query: string) {
     setIsLoading(true);
     setIsError(false);
     setMovies([]);
@@ -25,36 +23,36 @@ export default function App() {
 
     try {
       const results = await fetchMovies(query);
+
+      if (results.length === 0) {
+        toast("No movies found. Try another query 🙂");
+        return;
+      }
+
       setMovies(results);
     } catch (error) {
       setIsError(true);
+      toast.error("Oops... Something went wrong. Try again.");
       console.error(error);
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleSelectMovie = (movie: Movie) => {
-    setSelectedMovie(movie);
-  };
-
-  const handleCloseModal = () => {
-    setSelectedMovie(null);
-  };
-
-  const hasMovies = movies.length > 0;
+  }
 
   return (
     <div className={styles.app}>
       <Toaster position="top-right" />
       <SearchBar onSubmit={handleSearch} />
 
-      {isLoading && <Loader />}
-      {isError && <ErrorMessage />}
-      {hasMovies && <MovieGrid movies={movies} onSelect={handleSelectMovie} />}
+      {isLoading && <p>Loading...</p>}
+      {isError && <p>Error occurred</p>}
+
+      {movies.length > 0 && (
+        <MovieGrid movies={movies} onSelect={setSelectedMovie} />
+      )}
 
       {selectedMovie && (
-        <MovieModal movie={selectedMovie} onClose={handleCloseModal} />
+        <MovieModal movie={selectedMovie} onClose={() => setSelectedMovie(null)} />
       )}
     </div>
   );
