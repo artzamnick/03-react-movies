@@ -5,6 +5,8 @@ import styles from "./App.module.css";
 import SearchBar from "../SearchBar/SearchBar";
 import MovieGrid from "../MovieGrid/MovieGrid";
 import MovieModal from "../MovieModal/MovieModal";
+import Loader from "../Loader/Loader";
+import ErrorMessage from "../ErrorMessage/ErrorMessage";
 
 import { fetchMovies } from "../../services/movieService";
 import type { Movie } from "../../types/movie";
@@ -32,7 +34,7 @@ export default function App() {
       setMovies(results);
     } catch (error) {
       setIsError(true);
-      toast.error("Oops... Something went wrong. Try again.");
+      toast.error("There was an error, please try again...");
       console.error(error);
     } finally {
       setIsLoading(false);
@@ -44,15 +46,18 @@ export default function App() {
       <Toaster position="top-right" />
       <SearchBar onSubmit={handleSearch} />
 
-      {isLoading && <p>Loading...</p>}
-      {isError && <p>Error occurred</p>}
+      {isLoading && <Loader />}
+      {isError && <ErrorMessage />}
 
       {movies.length > 0 && (
         <MovieGrid movies={movies} onSelect={setSelectedMovie} />
       )}
 
       {selectedMovie && (
-        <MovieModal movie={selectedMovie} onClose={() => setSelectedMovie(null)} />
+        <MovieModal
+          movie={selectedMovie}
+          onClose={() => setSelectedMovie(null)}
+        />
       )}
     </div>
   );
