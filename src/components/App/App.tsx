@@ -3,6 +3,8 @@ import { Toaster } from "react-hot-toast";
 
 import styles from "./App.module.css";
 import SearchBar from "../SearchBar/SearchBar";
+import MovieGrid from "../MovieGrid/MovieGrid";
+
 import { fetchMovies } from "../../services/movieService";
 import type { Movie } from "../../types/movie";
 
@@ -27,13 +29,21 @@ export default function App() {
     }
   }
 
+  const handleSelectMovie = (movie: Movie) => {
+    console.log("selected:", movie);
+  };
+
   return (
     <div className={styles.app}>
       <Toaster position="top-right" />
       <SearchBar onSubmit={handleSearch} />
+
       {isLoading && <p>Loading...</p>}
       {isError && <p>Error occurred</p>}
-      {movies.length > 0 && <p>Found movies: {movies.length}</p>}
+
+      {movies.length > 0 && (
+        <MovieGrid movies={movies} onSelect={handleSelectMovie} />
+      )}
     </div>
   );
 }
